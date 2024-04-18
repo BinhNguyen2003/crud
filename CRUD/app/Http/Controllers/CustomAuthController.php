@@ -12,81 +12,17 @@ use Illuminate\Pagination\LengthAwarePaginator;
 //Unknow
 class CustomAuthController extends Controller
 {
-        public function index()
+        public function viewUser($id){
+        $user = User::find($id);
+        return view('show_view_user',compact('user'));
+    }
+public function show()
     {
-        return view('auth.login');
-    }
+        //hiện tất cả 
+        $user = User::all();
+        return view('auth.viewuser', compact('user'));
+    } 
+}
 
-    public function customLogin(Request $request)
-    {
-     
-        $email = $request->get('email');
-        $data = $request->all();
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-        ]);
-
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            return redirect()->intended('dashboard')
-                ->withSuccess('Signed in');
-        }
-
-        return redirect("login")->withSuccess('Login details are not valid');
-    }
-
-    public function registration()
-    {
-        return view('auth.registration');
-    }
-
-    public function customRegistration(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-           'email' => 'required|email|unique:users',
-           'password' => 'required|min:6',
-        ]);
-
-        $data = $request->all();
-        //upload
-        $file = $request->file('fileToUpload');
-        $fileName = $file->getClientOriginalName();
-        $destinationPath = 'uploads';
-        $file->move($destinationPath, $file->getClientOriginalName());
-
-        $data['fileName'] = $fileName;
-        $check = $this->create($data);
-
-        return redirect("login")->withSuccess('You have signed-in');
-    }
-
-    public function create(array $data)
-    {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'image' => $data['fileName'],
-            'password' => Hash::make($data['password'])
-        ]);
-    }
-
-    public function dashboard()
-    {      
-        //View
-        if (Auth::check()) {
-            return view('auth.viewuser');
-        }            
-        return redirect("login")->withSuccess('You are not allowed to access');
-    }
-    public function signOut()
-    {
-        //Logout 
-        Session::flush();
-        Auth::logout();
-        return Redirect('login');
-    }
 
     
