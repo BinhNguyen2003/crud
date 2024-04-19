@@ -98,6 +98,49 @@ public function show()
         Auth::logout();
         return Redirect('login');
     }
+public function edit($id)
+    {
+        //tim id de update
+        //tim user theo id
+        $user = user::find($id);
+        return view('auth.edit', compact('user'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        //tìm xong tới update
+        //tim user theo id
+        $user = User::find($id);
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->phone = $request->input('phone');
+        if ($request->hasFile('image')) {
+            //co file dinh kem trong form update thi tim file cu va xoa di
+            //neu truoc do ko co anh dai dien cu thi ko xoa
+            $anhcu = 'uploads/students/' . $user->anhdaidien;
+            if (File::exists($anhcu)) {
+                File::delete($anhcu);
+            }
+            $file = $request->file('image');
+            $extension = $file->getClientOriginalExtension(); //lay ten mo rong .jpg, .png,....
+            $filename = time() . '.' . $extension;
+            $file->move('uploads/students/', $filename);  //upload len thu muc uploads/students
+            $user->anhdaidien = $filename;
+        }
+        $user->update();
+        return redirect()->back()->with('status', 'Cap nhat sinh vien voi anh dai dien thanh cong');
+    }
+
+    public function delete($id)
+    {
+        $user = User::find($id);
+        $anhdaidien = 'uploads/students/' . $user->anhdaidien;
+        if (File::exists($anhdaidien)) {
+            File::delete($anhdaidien);
+        }
+        $user->delete();
+        return redirect()->back()->with('status', 'Xóa sinh viên và ảnh đại diện thành công');
+    }
 }
 
 
